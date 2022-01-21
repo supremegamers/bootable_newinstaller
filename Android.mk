@@ -33,7 +33,7 @@ ifneq ($(USE_SQUASHFS),0)
 MKSQUASHFS := $(HOST_OUT_EXECUTABLES)/mksquashfs$(HOST_EXECUTABLE_SUFFIX)
 
 define build-squashfs-target
-	$(hide) $(MKSQUASHFS) $(1) $(2) -noappend -comp gzip
+	$(hide) $(MKSQUASHFS) $(1) $(2) -noappend -comp zstd
 endef
 endif
 
@@ -54,7 +54,7 @@ $(INITRD_RAMDISK): $(initrd_bin) $(systemimg) $(TARGET_INITRD_SCRIPTS) | $(ACP) 
 	echo "VER=$(VER)" > $(TARGET_INITRD_OUT)/scripts/00-ver
 	$(if $(RELEASE_OS_TITLE),echo "OS_TITLE=$(RELEASE_OS_TITLE)" >> $(TARGET_INITRD_OUT)/scripts/00-ver)
 	$(if $(INSTALL_PREFIX),echo "INSTALL_PREFIX=$(INSTALL_PREFIX)" >> $(TARGET_INITRD_OUT)/scripts/00-ver)
-	$(MKBOOTFS) $(<D) $(TARGET_INITRD_OUT) | gzip -9 > $@
+	$(MKBOOTFS) $(<D) $(TARGET_INITRD_OUT) | zstd -9 > $@
 
 INSTALL_RAMDISK := $(PRODUCT_OUT)/install.img
 INSTALLER_BIN := $(TARGET_INSTALLER_OUT)/sbin/efibootmgr
@@ -65,12 +65,12 @@ ifeq ($(TARGET_ARCH),x86_64)
 ifneq ("$(wildcard rusgik/target/x86_64-unknown-linux-musl/release/*)","")
 $(INSTALL_RAMDISK): $(wildcard $(LOCAL_PATH)/install/*/* $(LOCAL_PATH)/install/*/*/*/*) $(INSTALLER_BIN) | $(MKBOOTFS)
 	$(if $(TARGET_INSTALL_SCRIPTS),mkdir -p $(TARGET_INSTALLER_OUT)/scripts; $(ACP) -p $(TARGET_INSTALL_SCRIPTS) $(TARGET_INSTALLER_OUT)/scripts)
-	$(MKBOOTFS) $(dir $(dir $(<D))) $(TARGET_INSTALLER_OUT) | gzip -9 > $@
+	$(MKBOOTFS) $(dir $(dir $(<D))) $(TARGET_INSTALLER_OUT) | zstd -9 > $@
 	mv $(PRODUCT_OUT)/root/init $(PRODUCT_OUT)/root/init.real && cp rusgik/target/x86_64-unknown-linux-musl/release/rusty-magisk $(PRODUCT_OUT)/root/init && chmod 777 $(PRODUCT_OUT)/root/init
 else
 $(INSTALL_RAMDISK): $(wildcard $(LOCAL_PATH)/install/*/* $(LOCAL_PATH)/install/*/*/*/*) $(INSTALLER_BIN) | $(MKBOOTFS)
 	$(if $(TARGET_INSTALL_SCRIPTS),mkdir -p $(TARGET_INSTALLER_OUT)/scripts; $(ACP) -p $(TARGET_INSTALL_SCRIPTS) $(TARGET_INSTALLER_OUT)/scripts)
-	$(MKBOOTFS) $(dir $(dir $(<D))) $(TARGET_INSTALLER_OUT) | gzip -9 > $@
+	$(MKBOOTFS) $(dir $(dir $(<D))) $(TARGET_INSTALLER_OUT) | zstd -9 > $@
 endif
 
 #~ endif
@@ -80,12 +80,12 @@ else ifeq ($(TARGET_ARCH),x86)
 ifneq ("$(wildcard rusgik/target/i686-unknown-linux-musl/release/*)","")
 $(INSTALL_RAMDISK): $(wildcard $(LOCAL_PATH)/install/*/* $(LOCAL_PATH)/install/*/*/*/*) $(INSTALLER_BIN) | $(MKBOOTFS)
 	$(if $(TARGET_INSTALL_SCRIPTS),mkdir -p $(TARGET_INSTALLER_OUT)/scripts; $(ACP) -p $(TARGET_INSTALL_SCRIPTS) $(TARGET_INSTALLER_OUT)/scripts)
-	$(MKBOOTFS) $(dir $(dir $(<D))) $(TARGET_INSTALLER_OUT) | gzip -9 > $@
+	$(MKBOOTFS) $(dir $(dir $(<D))) $(TARGET_INSTALLER_OUT) | zstd -9 > $@
 	mv $(PRODUCT_OUT)/root/init $(PRODUCT_OUT)/root/init.real && cp rusgik/target/i686-unknown-linux-musl/release/rusty-magisk $(PRODUCT_OUT)/root/init && chmod 777 $(PRODUCT_OUT)/root/init
 else
 $(INSTALL_RAMDISK): $(wildcard $(LOCAL_PATH)/install/*/* $(LOCAL_PATH)/install/*/*/*/*) $(INSTALLER_BIN) | $(MKBOOTFS)
 	$(if $(TARGET_INSTALL_SCRIPTS),mkdir -p $(TARGET_INSTALLER_OUT)/scripts; $(ACP) -p $(TARGET_INSTALL_SCRIPTS) $(TARGET_INSTALLER_OUT)/scripts)
-	$(MKBOOTFS) $(dir $(dir $(<D))) $(TARGET_INSTALLER_OUT) | gzip -9 > $@
+	$(MKBOOTFS) $(dir $(dir $(<D))) $(TARGET_INSTALLER_OUT) | zstd -9 > $@
 endif
 
 endif
