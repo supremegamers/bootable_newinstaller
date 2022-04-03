@@ -71,10 +71,6 @@ else
 $(INSTALL_RAMDISK): $(wildcard $(LOCAL_PATH)/install/*/* $(LOCAL_PATH)/install/*/*/*/*) $(INSTALLER_BIN) | $(MKBOOTFS)
 	$(if $(TARGET_INSTALL_SCRIPTS),mkdir -p $(TARGET_INSTALLER_OUT)/scripts; $(ACP) -p $(TARGET_INSTALL_SCRIPTS) $(TARGET_INSTALLER_OUT)/scripts)
 	$(MKBOOTFS) $(dir $(dir $(<D))) $(TARGET_INSTALLER_OUT) | zstd -9 > $@
-	echo '/dev/magisk(/.*)?    u:object_r:magisk_file:s0' | tee -a $(PRODUCT_OUT)/system/vendor/etc/selinux/vendor_file_contexts
-	echo '/data/adb/magisk(/.*)?   u:object_r:magisk_file:s0' | tee -a $(PRODUCT_OUT)/system/vendor/etc/selinux/vendor_file_contexts
-	vendor/supremegamers/kokoro/magiskpolicy --load $(PRODUCT_OUT)/system/vendor/etc/selinux/precompiled_sepolicy --save $(PRODUCT_OUT)/system/vendor/etc/selinux/precompiled_sepolicy --magisk 'allow magisk * * *'
-	vendor/supremegamers/kokoro/magiskpolicy --load $(PRODUCT_OUT)/system/vendor/etc/selinux/precompiled_sepolicy --save $(PRODUCT_OUT)/system/vendor/etc/selinux/precompiled_sepolicy --magisk "allow * magisk_file lnk_file *"
 endif
 
 #~ endif
@@ -90,10 +86,6 @@ else
 $(INSTALL_RAMDISK): $(wildcard $(LOCAL_PATH)/install/*/* $(LOCAL_PATH)/install/*/*/*/*) $(INSTALLER_BIN) | $(MKBOOTFS)
 	$(if $(TARGET_INSTALL_SCRIPTS),mkdir -p $(TARGET_INSTALLER_OUT)/scripts; $(ACP) -p $(TARGET_INSTALL_SCRIPTS) $(TARGET_INSTALLER_OUT)/scripts)
 	$(MKBOOTFS) $(dir $(dir $(<D))) $(TARGET_INSTALLER_OUT) | zstd -9 > $@
-	echo '/dev/magisk(/.*)?    u:object_r:magisk_file:s0' | tee -a $(PRODUCT_OUT)/system/vendor/etc/selinux/vendor_file_contexts
-	echo '/data/adb/magisk(/.*)?   u:object_r:magisk_file:s0' | tee -a $(PRODUCT_OUT)/system/vendor/etc/selinux/vendor_file_contexts
-	vendor/supremegamers/kokoro/magiskpolicy --load $(PRODUCT_OUT)/system/vendor/etc/selinux/precompiled_sepolicy --save $(PRODUCT_OUT)/system/vendor/etc/selinux/precompiled_sepolicy --magisk 'allow magisk * * *'
-	vendor/supremegamers/kokoro/magiskpolicy --load $(PRODUCT_OUT)/system/vendor/etc/selinux/precompiled_sepolicy --save $(PRODUCT_OUT)/system/vendor/etc/selinux/precompiled_sepolicy --magisk "allow * magisk_file lnk_file *"
 endif
 
 endif
