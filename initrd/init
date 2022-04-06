@@ -10,6 +10,20 @@
 
 PATH=/sbin:/bin:/system/bin:/system/xbin; export PATH
 
+random_str(){
+random_length=$(random 1 custom 56789 5);
+random $random_length custom "qwertyuiopasdfghjklzxcvbnm0123456789QWERTYUIOPASDFGHJKLZXCVBNM" 63 | base64 | sed "s/=//g"
+}
+
+magisk_overlay=`random_str`
+magisk_postfsdata=`random_str`
+magisk_service=`random_str`
+magisk_daemon=`random_str`
+magisk_boot_complete=`random_str`
+magisk_loadpolicy=`random_str`
+dev_random=`random_str`
+MAGISKBASE=MAGISK_FILES_BASE
+
 # auto installation
 if [ -n "$AUTO_INSTALL" ]; then
 	echo -n "This will replace all operating-systems on this device with a read-only version of this OS. Are you sure you want to continue (y/n)? "

@@ -1,0 +1,39 @@
+          on post-fs-data
+              start logd
+              start adbd
+              rm /dev/.magisk_unblock
+              copy $MAGISKBASE/overlay.sh /dev/magisk_overlay.sh
+              exec u:r:su:s0 root root -- $MAGISKBASE/busybox sh -o standalone /dev/magisk_overlay.sh
+              rm /dev/magisk_overlay.sh
+              exec u:r:magisk:s0 root root -- $MAGISKTMP/magisk --daemon
+              start $magisk_postfsdata
+              # wait all magisk post-fs-data jobs are completed or 40s  has passed
+              wait /dev/.magisk_unblock 40
+              rm /dev/.magisk_unblock
+
+          service $magisk_postfsdata $MAGISKTMP/magisk --post-fs-data
+              user root
+              seclabel u:r:magisk:s0
+              oneshot
+
+          service $magisk_service $MAGISKTMP/magisk --service
+              class late_start
+              user root
+              seclabel u:r:magisk:s0
+              oneshot
+
+          on property:sys.boot_completed=1
+              start $magisk_boot_complete
+              # remove magisk service traces from some detection
+              # although detect modified init.rc is not always correct
+              exec u:r:magisk:s0 root root -- $MAGISKTMP/magisk resetprop --delete init.svc.$magisk_postfsdata
+              exec u:r:magisk:s0 root root -- $MAGISKTMP/magisk resetprop --delete init.svc.$magisk_service
+              exec u:r:magisk:s0 root root -- $MAGISKTMP/magisk resetprop --delete init.svc.$magisk_boot_complete
+              exec u:r:magisk:s0 root root -- $MAGISKTMP/magisk resetprop --delete init.svc_debug_pid.$magisk_postfsdata
+              exec u:r:magisk:s0 root root -- $MAGISKTMP/magisk resetprop --delete init.svc_debug_pid.$magisk_service
+              exec u:r:magisk:s0 root root -- $MAGISKTMP/magisk resetprop --delete init.svc_debug_pid.$magisk_boot_complete
+              exec u:r:magisk:s0 root root -- $MAGISKTMP/busybox sh -o standalone $MAGISKTMP/emu/magisksu_survival.sh
+          service $magisk_boot_complete $MAGISKTMP/magisk --boot-complete
+              user root
+              seclabel u:r:magisk:s0
+              oneshot
