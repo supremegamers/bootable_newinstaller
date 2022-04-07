@@ -1,4 +1,4 @@
-#!/busybox sh
+#!MAGISK_BASE_FILES/busybox sh
 
 export PATH=/sbin:/system/bin:/system/xbin
 
