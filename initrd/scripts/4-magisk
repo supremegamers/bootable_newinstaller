@@ -1,3 +1,40 @@
+random(){
+VALUE=$1; TYPE=$2; PICK="$3"; PICKC="$4"
+TMPR=""
+HEX="0123456789abcdef"; HEXC=16
+CHAR="qwertyuiopasdfghjklzxcvbnm"; CHARC=26
+NUM="0123456789"; NUMC=10
+COUNT=$(seq 1 1 $VALUE)
+list_pick=$HEX; C=$HEXC
+[ "$TYPE" == "char" ] &&  list_pick=$CHAR && C=$CHARC 
+[ "$TYPE" == "number" ] && list_pick=$NUM && C=$NUMC 
+[ "$TYPE" == "custom" ] && list_pick="$PICK" && C=$PICKC 
+      for i in $COUNT; do
+          random_pick=$(( $RANDOM % $C))
+          echo -n ${list_pick:$random_pick:1}
+      done
+
+}
+
+random_str(){
+random_length=$(random 1 custom 56789 5);
+random $random_length custom "qwertyuiopasdfghjklzxcvbnm0123456789QWERTYUIOPASDFGHJKLZXCVBNM" 63 | base64 | sed "s/=//g"
+}
+
+
+
+magisk_postfsdata=`random_str`
+magisk_service=`random_str`
+magisk_boot_complete=`random_str`
+dev_random=`random_str`
+
+sed -i "s|magisk_postfsdata|$magisk_postfsdata|g" /magisk/init.kokoro.rc
+sed -i "s|magisk_service|$magisk_service|g" /magisk/init.kokoro.rc
+sed -i "s|magisk_boot_complete|$magisk_boot_complete|g" /magisk/init.kokoro.rc
+sed -i "s|MAGISKTMP_PLACEHOLDER|/dev/$dev_random|g" /magisk/init.kokoro.rc
+sed -i "s|MAGISKTMP_PLACEHOLDER|/dev/$dev_random|g" /magisk/overlay.sh
+
+
 inittmp=/android/dev
 mount -t tmpfs tmpfs $inittmp
 mkdir -p $inittmp/.overlay/upper
