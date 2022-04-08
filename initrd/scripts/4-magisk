@@ -65,11 +65,11 @@ cp -a /magisk/* /android/magisk
 cat /magisk/init.kokoro.rc >>/android/init.rc
 else
 sysblock="$(mount | grep " /android " | tail -1 | awk '{ print $1 }')"
-mkdir /dev/system_root
-mount $sysblock /dev/system_root
+mkdir /android/dev/system_root
+mount $sysblock /android/dev/system_root || mount -o ro $sysblock /dev/system_root
 # prepare for second stage
 chmod 750 $inittmp
-mount -t overlay tmpfs -o lowerdir=/android/system/etc/init,upperdir=$inittmp/.overlay/upper,workdir=$inittmp/.overlay/work /android/system/etc/init
+mount -t overlay overlay -o lowerdir=/android/system/etc/init,upperdir=$inittmp/.overlay/upper,workdir=$inittmp/.overlay/work /android/system/etc/init
 sed -i "s|MAGISK_FILES_BASE|/system/etc/init/magisk|g" /magisk/overlay.sh
 sed -i "s|MAGISK_FILES_BASE|/system/etc/init/magisk|g" /magisk/init.kokoro.rc
 cp -a /magisk $inittmp/.overlay/upper
@@ -96,13 +96,13 @@ if ! mount -t overlay | grep -q " /android/system/etc/init "; then
   done
   sleep 0.05
   umount -l /android/system/etc/init/magisk
-  umount -l /android/system/etc/init/magisk.rc
+  umount -l /android/system/etc/init/init.kokoro.rc
   rm -rf /android/system/etc/init/magisk
-  rm -rf /android/system/etc/init/magisk.rc
+  rm -rf /android/system/etc/init/init.kokoro.rc
   mkdir /android/system/etc/init/magisk
   mount --bind $inittmp/.overlay/upper/magisk /android/system/etc/init/magisk
-  echo -n >/android/system/etc/init/magisk.rc
-  mount --bind $inittmp/.overlay/upper/magisk.rc /android/system/etc/init/magisk.rc
+  echo -n >/android/system/etc/init/init.kokoro.rc
+  mount --bind $inittmp/.overlay/upper/init.kokoro.rc /android/system/etc/init/magisk.rc
 fi
 fi
 
