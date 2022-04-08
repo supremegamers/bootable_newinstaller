@@ -74,7 +74,6 @@ sed -i "s|MAGISK_FILES_BASE|/system/etc/init/magisk|g" /magisk/overlay.sh
 sed -i "s|MAGISK_FILES_BASE|/system/etc/init/magisk|g" /magisk/init.kokoro.rc
 cp -a /magisk $inittmp/.overlay/upper
 cp /magisk/init.kokoro.rc $inittmp/.overlay/upper/init.kokoro.rc
-fi
 
 # fail back to magic mount if overlayfs is unavailable
 
@@ -104,6 +103,7 @@ if ! mount -t overlay | grep -q " /android/system/etc/init "; then
   mount --bind $inittmp/.overlay/upper/magisk /android/system/etc/init/magisk
   echo -n >/android/system/etc/init/magisk.rc
   mount --bind $inittmp/.overlay/upper/magisk.rc /android/system/etc/init/magisk.rc
+fi
 fi
 
 # pre-init sepolicy patch
