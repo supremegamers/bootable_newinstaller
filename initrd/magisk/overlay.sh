@@ -66,7 +66,7 @@ count=0
 # force umount /sbin tmpfs
 
 until ! mount | grep -q " /sbin "; do
-[  -gt 10 ] && break
+[ "$count" -gt 10 ] && break
 umount -l /sbin 2>/dev/null
 sleep 0.1
 count=1
