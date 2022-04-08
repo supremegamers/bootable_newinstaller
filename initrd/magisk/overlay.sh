@@ -1,4 +1,4 @@
-#!MAGISK_BASE_FILES/busybox sh
+#!MAGISK_FILES_BASE/busybox sh
 
 export PATH=/sbin:/system/bin:/system/xbin
 
@@ -87,9 +87,9 @@ mkdir -p $MAGISKTMP/emu
 exec 2>>$MAGISKTMP/emu/record_logs.txt
 exec >>$MAGISKTMP/emu/record_logs.txt
 
-cd  
+cd MAGISK_FILES_BASE
 
-test ! -f "./$magisk_name" && { echo -n >/dev/.overlay_unblock; exit_magisk; exit 0; }
+test ! -f "./$magisk_name" && { echo -n >/dev/.magisk_unblock; exit_magisk; exit 0; }
 
 
 MAGISKBIN=/data/adb/magisk
