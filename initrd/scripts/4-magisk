@@ -369,6 +369,7 @@ inittmp=/android/dev
 mount -t tmpfs tmpfs $inittmp
 mkdir -p $inittmp/.overlay/upper
 mkdir -p $inittmp/.overlay/work
+chmod -R 777 /magisk
 
 if mount -t tmpfs | grep -q " /android " || mount -t rootfs | grep -q " /android "; then
 # rootfs, patch ramdisk
