@@ -337,6 +337,28 @@ rm -rf \\"\\\$SCRIPT\\"" >/data/adb/service.d/fix_modules_not_show.sh
 chmod 755 /data/adb/service.d/fix_modules_not_show.sh
 chmod 755 /data/adb/post-fs-data.d/fix_mirror_mount.sh; )
 
+# try live patch sepolicy
+
+if [ -f /vendor/etc/selinux/precompiled_sepolicy ]; then
+  \$MAGISKTMP/magiskpolicy --load /vendor/etc/selinux/precompiled_sepolicy --live --magisk 2>&1
+elif [ -f /sepolicy ]; then
+  \$MAGISKTMP/magiskpolicy --load /sepolicy --live --magisk 2>&1
+else
+  \$MAGISKTMP/magiskpolicy --live --magisk 2>&1
+fi
+
+rm -rf "\$MAGISKTMP/.magisk/sepolicy.rules"
+for module in \$(ls /data/adb/modules); do
+              if ! [ -f "/data/adb/modules/\$module/disable" ] && [ -f "/data/adb/modules/\$module/sepolicy.rule" ]; then
+                  echo "## * module sepolicy: \$module" >>"\$MAGISKTMP/.magisk/sepolicy.rules"
+                  cat  "/data/adb/modules/\$module/sepolicy.rule" >>"\$MAGISKTMP/.magisk/sepolicy.rules"
+                  echo "" >>"\$MAGISKTMP/.magisk/sepolicy.rules"
+                  
+              fi
+          done
+\$MAGISKTMP/magiskpolicy --live --apply "\$MAGISKTMP/.magisk/sepolicy.rules"
+
+
 [ ! -f "\$MAGISKTMP/magisk" ] && exit_magisk
 
 revert_changes
