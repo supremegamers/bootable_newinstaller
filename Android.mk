@@ -16,7 +16,7 @@ BUILD_TOP := $(shell pwd)
 ifneq ($(filter x86%,$(TARGET_ARCH)),)
 LOCAL_PATH := $(call my-dir)
 
-RELEASE_OS_TITLE := Sakura-5.2
+RELEASE_OS_TITLE := Kasumi-v1.2
 
 include $(CLEAR_VARS)
 LOCAL_IS_HOST_MODULE := true
@@ -26,7 +26,7 @@ LOCAL_MODULE_CLASS := EXECUTABLES
 LOCAL_POST_INSTALL_CMD := $(hide) sed -i "s|CMDLINE|$(BOARD_KERNEL_CMDLINE)|" $(HOST_OUT_EXECUTABLES)/$(LOCAL_MODULE)
 include $(BUILD_PREBUILT)
 
-VER ?= $$(echo "2021-04-04")
+VER ?= $$(date "+%Y-%m-%d")
 
 # use squashfs for iso, unless explictly disabled
 ifneq ($(USE_SQUASHFS),0)
@@ -207,7 +207,7 @@ endif
 
 BUILD_NAME_VARIANT := $(ROM_VENDOR_VERSION)
 
-ISO_IMAGE := $(PRODUCT_OUT)/$(SAKURA_VERSION).iso
+ISO_IMAGE := $(PRODUCT_OUT)/$(LINEAGE_VERSION).iso
 ISOHYBRID := LD_LIBRARY_PATH=$(LOCAL_PATH)/install/lib external/syslinux/bios/utils/isohybrid
 $(ISO_IMAGE): $(boot_dir) $(BUILT_IMG)
 	# Generate Changelog
@@ -233,7 +233,7 @@ rpm: $(wildcard $(LOCAL_PATH)/rpm/*) $(BUILT_IMG)
 	PATH="/sbin:/usr/sbin:/bin:/usr/bin"; \
 	rpmbuild -bb --target=$(if $(filter x86,$(TARGET_ARCH)),i686,x86_64) -D"cmdline $(BOARD_KERNEL_CMDLINE)" \
 		-D"_topdir $$OUT/rpm" -D"_sourcedir $$OUT" -D"systemimg $(notdir $(systemimg))" -D"ver $(VER)" -D"epoch $$EPOCH" \
-		$(if $(SAKURA_VERSION),-D"name $(SAKURA_VERSION)") \
+		$(if $(LINEAGE_VERSION),-D"name $(LINEAGE_VERSION)") \
 		-D"install_prefix $(if $(INSTALL_PREFIX),$(INSTALL_PREFIX),android-$(VER))" $(filter %.spec,$^); \
 	mv $$OUT/rpm/RPMS/*/*.rpm $$OUT
 

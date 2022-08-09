@@ -130,14 +130,11 @@ check_root()
 	rm /sbin/mke2fs
 	hash -r
 cat << "EOF"
- ____            _           _     ____        _                    
-|  _ \ _ __ ___ (_) ___  ___| |_  / ___|  __ _| | ___   _ _ __ __ _ 
-| |_) | '__/ _ \| |/ _ \/ __| __| \___ \ / _` | |/ / | | | '__/ _` |
-|  __/| | | (_) | |  __/ (__| |_   ___) | (_| |   <| |_| | | | (_| |
-|_|   |_|  \___// |\___|\___|\__| |____/ \__,_|_|\_\\__,_|_|  \__,_|
-              |__/                          
+//          Project Kasumi          //
+// PoPiPa, PiPoPa, PoPiPaPaPiPoPa~! //
 
---Feels Like Spring, on your PC ;)
+Based on Project Materium, brought to you by Yuki (@AITEx64) and Beru Shinsetsu (@WindowZ414).
+Ported to x86 PCs using Android-Generic Project by HMTheBoy154 
 EOF
 }
 
