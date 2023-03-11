@@ -16,7 +16,7 @@ BUILD_TOP := $(shell pwd)
 ifneq ($(filter x86%,$(TARGET_ARCH)),)
 LOCAL_PATH := $(call my-dir)
 
-RELEASE_OS_TITLE := BlissOS-$(VERSION)
+RELEASE_OS_TITLE := LMODroid-$(LMODROID_VERSION)
 
 include $(CLEAR_VARS)
 LOCAL_IS_HOST_MODULE := true
@@ -221,12 +221,12 @@ endif
 
 BUILD_NAME_VARIANT := $(ROM_VENDOR_VERSION)
 
-ISO_IMAGE := $(PRODUCT_OUT)/$(BLISS_BUILD_ZIP).iso
+ISO_IMAGE := $(PRODUCT_OUT)/$(LMODROID_BUILD_NAME).iso
 ISOHYBRID := LD_LIBRARY_PATH=$(LOCAL_PATH)/install/lib external/syslinux/bios/utils/isohybrid
 $(ISO_IMAGE): $(boot_dir) $(BUILT_IMG)
 	# Generate Changelog
 	bash bootable/newinstaller/tools/changelog
-	$(hide) mv Changelog.txt $(PRODUCT_OUT)/Changelog-$(BLISS_VERSION).txt
+	$(hide) mv Changelog.txt $(PRODUCT_OUT)/Changelog-$(LMODROID_BUILD_NAME).txt
 	@echo ----- Making iso image ------
 	$(hide) sed -i "s|\(Installation CD\)\(.*\)|\1 $(VER)|; s|CMDLINE|$(BOARD_KERNEL_CMDLINE)|" $</isolinux/isolinux.cfg
 	$(hide) sed -i "s|VER|$(VER)|; s|CMDLINE|$(BOARD_KERNEL_CMDLINE)|" $</efi/boot/android.cfg
@@ -237,28 +237,8 @@ $(ISO_IMAGE): $(boot_dir) $(BUILT_IMG)
 		-no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -e boot/grub/efi.img -no-emul-boot \
 		-input-charset utf-8 -V "$(if $(RELEASE_OS_TITLE),$(RELEASE_OS_TITLE),Android-x86) ($(TARGET_ARCH))" -o $@ $^
 	$(hide) $(ISOHYBRID) --uefi $@
-	$(hide) $(SHA256) $(ISO_IMAGE) | sed "s|$(PRODUCT_OUT)/||" > $(ISO_IMAGE).sha256
-	@echo -e ${CL_CYN}""${CL_CYN}
-	@echo -e ${CL_CYN}"      ___           ___                   ___           ___      "${CL_CYN}
-	@echo -e ${CL_CYN}"     /\  \         /\__\      ___        /\  \         /\  \     "${CL_CYN}
-	@echo -e ${CL_CYN}"    /::\  \       /:/  /     /\  \      /::\  \       /::\  \    "${CL_CYN}
-	@echo -e ${CL_CYN}"   /:/\:\  \     /:/  /      \:\  \    /:/\ \  \     /:/\ \  \   "${CL_CYN}
-	@echo -e ${CL_CYN}"  /::\~\:\__\   /:/  /       /::\__\  _\:\~\ \  \   _\:\~\ \  \  "${CL_CYN}
-	@echo -e ${CL_CYN}" /:/\:\ \:\__\ /:/__/     __/:/\/__/ /\ \:\ \ \__\ /\ \:\ \ \__\ "${CL_CYN}
-	@echo -e ${CL_CYN}" \:\~\:\/:/  / \:\  \    /\/:/  /    \:\ \:\ \/__/ \:\ \:\ \/__/ "${CL_CYN}
-	@echo -e ${CL_CYN}"  \:\ \::/  /   \:\  \   \::/__/      \:\ \:\__\    \:\ \:\__\   "${CL_CYN}
-	@echo -e ${CL_CYN}"   \:\/:/  /     \:\  \   \:\__\       \:\/:/  /     \:\/:/  /   "${CL_CYN}
-	@echo -e ${CL_CYN}"    \::/__/       \:\__\   \/__/        \::/  /       \::/  /    "${CL_CYN}
-	@echo -e ${CL_CYN}"     ~~            \/__/                 \/__/         \/__/     "${CL_CYN}
-	@echo -e ${CL_CYN}""${CL_CYN}
-	@echo -e ${CL_CYN}"===========-Bliss Package Complete-==========="${CL_RST}
-	@echo -e ${CL_CYN}"Zip: "${CL_MAG} $(ISO_IMAGE)${CL_RST}
-	@echo -e ${CL_CYN}"SHA256: "${CL_MAG}" `cat $(ISO_IMAGE).sha256 | cut -d ' ' -f 1`"${CL_RST}
-	@echo -e ${CL_CYN}"Size:"${CL_MAG}" `ls -lah $(ISO_IMAGE) | cut -d ' ' -f 5`"${CL_RST}
-	@echo -e ${CL_CYN}"==============================================="${CL_RST}
-	@echo -e ${CL_CYN}"Have A Truly Blissful Experience"${CL_RST}
-	@echo -e ${CL_CYN}"==============================================="${CL_RST}
-	@echo -e ""
+	$(hide) $(MD5) $(ISO_IMAGE) | sed "s|$(PRODUCT_OUT)/||" > $(ISO_IMAGE).md5sum
+	@echo "Package Complete: $(ISO_IMAGE)" >&2
 
 rpm: $(wildcard $(LOCAL_PATH)/rpm/*) $(BUILT_IMG)
 	@echo ----- Making an rpm ------
