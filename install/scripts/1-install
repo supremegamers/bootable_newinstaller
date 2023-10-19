@@ -14,8 +14,8 @@ menufile=/tmp/menu-$$
 CPIO=cpio
 OS_TITLE=${OS_TITLE:-Android-x86}
 BACK_TITLE="Made by Android-x86 Project, Modified by BlissLabs & Contributors"
-EFI_LABEL="BlissOS"
-INSTALL_LABEL="BlissOS"
+EFI_LABEL="LMODroid"
+INSTALL_LABEL="LMODroid"
 
 rebooting()
 {
@@ -769,7 +769,7 @@ install_refind()
 		echo -e '# Load rEFInd theme Regular\ninclude themes/refind-theme-regular/theme.conf' >> $refindcfg
 	fi
 	
-	# Start copying or configuring BlissOS boot options on rEFInd
+	# Start copying or configuring LMODroid boot options on rEFInd
 	cp -R /refind/android.cfg efi$efidir
 	echo -e '\ninclude android.cfg' >> $refindcfg
 	
