@@ -3,12 +3,14 @@
 # By Chih-Wei Huang <cwhuang@linux.org.tw>
 # and Thorsten Glaser <tg@mirbsd.org>
 #
+# Modified by BlissLabs & Contributors
+#
 # License: GNU Public License
 # We explicitely grant the right to use the scripts
 # with Android-x86 project.
 #
 
-PATH=/sbin:/bin:/system/bin:/system/xbin:/vendor/bin:/system/vendor/bin; export PATH
+PATH=/sbin:/bin:/system/bin:/system/xbin:/vendor/bin:/system_ext/bin:/system/vendor/bin:/system/system_ext/bin; export PATH
 
 # ASCII art
 text_art()
@@ -44,11 +46,11 @@ bliss_feature()
 {
 	if [ "$INTERNAL_MOUNT" -gt "0" ]; then
 cat << "EOF"
-# WARNING: INTERNAL_MOUNT option is enabled, all the internal partitions 
-# will now being recognized as USBs if the supported filesystem is available 
+# WARNING: INTERNAL_MOUNT option is enabled, all the internal partitions
+# will now be recognized as USBs if the supported filesystem is available
 # and will create empty directories like Android, DCIM, Documents, etc.
 
-## DO NOT PRESS "TAP TO FIX", IT WILL FORMAT THE DRIVE
+## DO NOT PRESS "TAP TO FIX", IT WILL FORMAT THE DRIVE!
 EOF
 
 	mount --bind system/vendor/etc/fstab.internal.x86 $(ls | grep fstab.)
@@ -57,28 +59,30 @@ EOF
 	# Enabling AOSP features for PC
 	if [ "$PC_MODE" -gt "0" ]; then
 cat << "EOF"
-# WARNING: PC_MODE will not working once Magisk or KernelSU modules are installed.
-# Visit BlissOS wiki for more info & solution
+# WARNING: PC_MODE will not work once Magisk or KernelSU modules are installed.
+# Visit BlissOS wiki for more info & solutions
 EOF
 		mount --bind system/etc/hidden_xml/pc.xml system/etc/permissions/pc.xml
 	fi
 
 	if [ "$HPE" -gt "0" ]; then
 cat << "EOF"
-# WARNING: HPE will not working once Magisk or KernelSU modules are installed.
-# Visit BlissOS wiki for more info & solution
+# WARNING: HPE will not work once Magisk or KernelSU modules are installed.
+# Visit BlissOS wiki for more info & solutions
 EOF
 		mount --bind system/etc/hidden_xml/hpe.xml system/etc/sysconfig/hpe.xml
 	fi
 
-	# Enable c2.ffmpeg on VINTF Manifest
-	if [ "$FFMPEG_CODEC" -gt "0" ]; then
+	# Hide bootctrl from VINTF manifest if we don't set up virtual A/B
+	if [ ! "$(cat /proc/cmdline | grep androidboot.slot_suffix)" ]; then
 cat << "EOF"
-# WARNING: c2.ffmpeg will not list on VINTF manifest list once Magisk
-# or KernelSU modules are installed.
-# Visit BlissOS wiki for more info & solution
+# WARNING: The system is not prepared with Virtual A/B, 
+# so OTA Update will not be supported
 EOF
-	mount --bind system/etc/hidden_xml/manifest_media_c2_V1_2_ffmpeg.xml system/vendor/etc/vintf/manifest/manifest_media_c2_V1_2_ffmpeg.xml
+	echo '<?xml version="1.0" encoding="utf-8"?>' > /tmp/fakeboot.xml
+	echo '<manifest version="1.0" type="device">' >> /tmp/fakeboot.xml
+	echo '</manifest>' >> /tmp/fakeboot.xml
+	mount --bind /tmp/fakeboot.xml system/vendor/etc/vintf/manifest/android.hardware.boot@1.2.xml
 	fi
 }
 
@@ -138,11 +142,15 @@ exec 2>> $LOG
 
 # early boot
 if test x"$HAS_CTTY" != x"Yes"; then
-	# initialise /proc and /sys
+	# initialise /proc & /sys and /tmp
 	busybox mount -t proc proc /proc
 	busybox mount -t sysfs sys /sys
+	busybox mount -t tmpfs tmpfs /tmp
 	# let busybox install all applets as symlinks
-	busybox --install -s
+	busybox --install -s /bin
+	# remove busybox fdisk & mke2fs
+	rm /bin/fdisk
+	rm /bin/mke2fs
 	# spawn shells on tty 2 and 3 if debug or installer
 	if test -n "$DEBUG" || test -n "$INSTALL"; then
 		# ensure they can open a controlling tty
@@ -154,13 +162,11 @@ if test x"$HAS_CTTY" != x"Yes"; then
 	if test -z "$DEBUG" || test -n "$INSTALL"; then
 		echo 0 0 0 0 > /proc/sys/kernel/printk
 	fi
-	# populate /dev
-	echo /sbin/mdev > /proc/sys/kernel/hotplug
-	mdev -s
-	sleep 3
 	# initialise /dev (first time)
+	busybox mount -t devtmpfs devtmpfs /dev
 	mkdir -p /dev/block
-	echo 0 > /proc/sys/kernel/printk
+	echo /bin/mdev > /proc/sys/kernel/hotplug
+	mdev -s
 	# re-run this script with a controlling tty
 	exec env HAS_CTTY=Yes setsid cttyhack /bin/sh "$0" "$@"
 fi
@@ -168,7 +174,8 @@ fi
 # now running under a controlling tty; debug output from stderr into log file
 # boot up Android
 
-chmod 755 /sbin/mount.ntfs-3g
+# First, chmod /sbin because somehow the build process messed up the permission
+chmod 755 /sbin/*
 
 error()
 {
@@ -208,6 +215,15 @@ check_root()
 		dev=$1
 	fi
 	try_mount ro $dev /mnt || return 1
+
+	# If $INSTALL is being set, assuming that we are in a removable device or
+	# in a iso or any type of device that copied all the content of an iso in
+	if [ -n "$INSTALL" ]; then
+		if [ ! -d "/mnt/isolinux" ] || [ ! -f "/mnt/install.img" ]; then
+			return 1
+		fi
+	fi
+
 	if [ -n "$iso" -a -e /mnt/$iso ]; then
 		mount --move /mnt /iso
 		mkdir /mnt/iso
@@ -225,9 +241,9 @@ check_root()
 			mount --move android /sfs
 			mount -o loop,noatime /sfs/system.img android
 		fi
-	elif [ -e /mnt/$SRC/system.img ]; then
+	elif [ -e /mnt/$SRC/system$SLOT.img ]; then
 		remount_rw
-		mount -o loop,noatime /mnt/$SRC/system.img android
+		mount -o loop,noatime /mnt/$SRC/system$SLOT.img android
 	elif [ -s /mnt/$SRC/system/system/build.prop ]; then
 		remount_rw
 		mount --bind /mnt/$SRC/system android
@@ -237,7 +253,6 @@ check_root()
 		return 1
 	fi
 	echo " Found at $1"
-	rm /sbin/mke2fs
 	hash -r
 	text_art
 }
@@ -261,6 +276,39 @@ debug_shell()
 	fi
 }
 
+setup_loop()
+{
+	for i in $(seq 0 9); do
+		if ! losetup /dev/loop$i >/dev/null 2>&1; then
+			if losetup /dev/loop$i $1 >/dev/null 2>&1; then
+				local dev="/dev/block/loop$i"
+
+				ln -s "/dev/loop$i" "$dev"
+				echo "$dev"
+
+				return 0
+			fi
+		fi
+	done
+}
+
+setup_ab_loops()
+{
+	if [ ! -z "$SLOT" ]; then
+		if [ "$SLOT" = "_a" ]; then
+			ln -s $(setup_loop /mnt/$SRC/system_b.img) /dev/block/by-name/system_b
+		else
+			ln -s $(setup_loop /mnt/$SRC/system_a.img) /dev/block/by-name/system_a
+		fi
+
+		ln -s $(setup_loop /mnt/$SRC/initrd_a.img) /dev/block/by-name/initrd_a
+		ln -s $(setup_loop /mnt/$SRC/initrd_b.img) /dev/block/by-name/initrd_b
+		ln -s $(setup_loop /mnt/$SRC/kernel_a) /dev/block/by-name/kernel_a
+		ln -s $(setup_loop /mnt/$SRC/kernel_b) /dev/block/by-name/kernel_b
+		ln -s $(setup_loop /mnt/$SRC/misc.img) /dev/block/by-name/misc
+	fi
+}
+
 echo "Detecting Android-x86..."
 echo ""
 echo "If it took too long to detect, reboot and check your installation folder"
@@ -274,6 +322,15 @@ for c in `cat /proc/cmdline`; do
 			SRC=iso
 			eval `echo $c | cut -b1-3,18-`
 			;;
+		androidboot.slot_suffix=*)
+			eval SLOT=`echo $c | cut -f 2 -d "="`
+			;;
+		androidboot.efidisk=*)
+			eval EFIDISK=`echo $c | cut -f 2 -d "="`
+			;;
+		androidboot.efidir=*)
+			eval EFIDIR=`echo $c | cut -f 2 -d "="`
+			;;
 		*)
 			;;
 	esac
@@ -283,6 +340,10 @@ cd /
 while :; do
 	for device in ${ROOT:-/dev/[hmnsvx][dmrv][0-9a-z]*}; do
 		check_root $device && break 2
+
+		# Also umount /android and /sfs if already mounted
+		mountpoint -q /android && umount /android
+		mountpoint -q /sfs && umount /sfs
 		mountpoint -q /mnt && umount /mnt
 	done
 	sleep 1
@@ -322,8 +383,10 @@ done
 
 # ensure keyboard driver is loaded
 if [ -n "$INSTALL" -o -n "$DEBUG" ]; then
+	echo "Detecting hardware..."
 	busybox modprobe -a atkbd hid-apple
 	auto_detect &
+	wait
 fi
 
 if [ 0$DEBUG -gt 0 ]; then
@@ -341,6 +404,8 @@ fi
 load_modules
 mount_data
 mount_sdcard
+mount_grub
+setup_ab_loops
 setup_tslib
 setup_dpi
 post_detect
