@@ -808,13 +808,13 @@ install_process()
 	[ -n "$INSTALL_PREFIX" ] && asrc=$INSTALL_PREFIX || asrc=android-$VER
 	set_answer_if_auto 1
 
+	datapart_cancel=1
 	if [ -n "$userdata_partition" ]; then
 		dialog --backtitle "$BACK_TITLE" --title " Confirm " --yesno \
 			"\nYou have chosen $userdata_partition as the userdata partition, are you sure you want to store data here ?
 \n\nThis is the final confirmation ! If you press 'No', setup will cancel this choice and start putting data next to system instead." 10 75
-		if [ $? -ne 0 ]; then
-			datapart_cancel=1
-		else
+		if [ $? -eq 0 ]; then
+			datapart_cancel=0
 			cmdline="$cmdline DATA=/dev/$userdata_partition"
 		fi
 	fi
