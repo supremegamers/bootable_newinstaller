@@ -182,9 +182,6 @@ BUILD_NAME_VARIANT := $(ROM_VENDOR_VERSION)
 
 ISO_IMAGE := $(PRODUCT_OUT)/$(LMODROID_BUILD_NAME).iso
 $(ISO_IMAGE): $(boot_dir) $(BUILT_IMG)
-	# Generate Changelog
-	bash bootable/newinstaller/tools/changelog
-	$(hide) mv Changelog.txt $(PRODUCT_OUT)/Changelog-$(LMODROID_BUILD_NAME).txt
 	@echo ----- Making iso image ------
 	$(hide) sed -i "s|\(Installation CD\)\(.*\)|\1 $(VER)|; s|CMDLINE|$(BOARD_KERNEL_CMDLINE)|" $</isolinux/isolinux.cfg
 	$(hide) sed -i "s|VER|$(VER)|; s|CMDLINE|$(BOARD_KERNEL_CMDLINE)|" $</efi/boot/android.cfg
