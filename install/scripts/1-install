@@ -918,7 +918,7 @@ if you already have a boot solution in place."
 
 	if [ $result -eq 0 ]; then
 		for d in android mnt sfs ./$SRC; do
-			[ -d $d ] && mv $d/* . && rmdir $d
+			[ -d $d ] && mv $d/* . && rmdir "$d"
 		done
 		chown 0.0 *
 		for f in *; do
