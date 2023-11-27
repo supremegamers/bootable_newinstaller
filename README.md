@@ -321,6 +321,10 @@ https://efi.akeo.ie/downloads/efifs-1.9/x64/
 
 isolinux all (3:6.04~git20190206.bf6db5b4+dfsg1-3)
 
+https://packages.debian.org/trixie/all/isolinux
+
 - isolinux/*.c32
 
 syslinux-common all (3:6.04~git20190206.bf6db5b4+dfsg1-3)
+
+https://packages.debian.org/trixie/all/syslinux-common
