@@ -315,6 +315,25 @@ efifs x86_64 (1.9)
 
 https://efi.akeo.ie/downloads/efifs-1.9/x64/
 
+- bin/sed 
+
+sed i386 (4.9-1)
+
+https://packages.debian.org/trixie/sed/i386
+
+- bin/stdbuf
+- usr/libexec/coreutils/libstdbuf.so
+
+coreutils i386 (9.1-1)
+
+https://packages.debian.org/trixie/coreutils/i386
+
+- lib/libacl.so.1
+
+libacl1 i386 (2.3.1-3)
+
+https://packages.debian.org/trixie/libacl1/i386
+
 ## iso
 
 - isolinux/isolinux.bin
@@ -328,3 +347,15 @@ https://packages.debian.org/trixie/all/isolinux
 syslinux-common all (3:6.04~git20190206.bf6db5b4+dfsg1-3)
 
 https://packages.debian.org/trixie/all/syslinux-common
+
+## Components that are on system image but required
+
+- /system_ext/bin/rsync
+
+rsync source with Android.bp to build on AOSP can be found on :
+https://github.com/LineageOS/android_external_rsync
+https://github.com/android-generic/android_external_rsync
+
+NOTE: Android-Generic will backport rsync to Android 11, but you will need to build libzstd
+
+https://github.com/android-generic/android_external_zstd

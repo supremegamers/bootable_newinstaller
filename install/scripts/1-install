@@ -903,7 +903,7 @@ if you already have a boot solution in place."
 		sysimg="sfs/system.img"
 	fi
 
-	files="mnt/$SRC/kernel mnt/$SRC/initrd.img $sysimg"
+	files="/mnt/$SRC/kernel /mnt/$SRC/initrd.img /$sysimg"
 	size=0
 	for s in `du -sk $files | awk '{print $1}'`; do
 		size=$(($size+$s))
@@ -912,8 +912,16 @@ if you already have a boot solution in place."
 	mkdir -p hd/$asrc
 	cd hd/$asrc
 	rm -rf system* *.img
-	( ( cd /; find $files | $CPIO -H newc -o ) | pv -ns ${size}k | ( $CPIO -iud > /dev/null; echo $? > /tmp/result )) 2>&1 \
-		| progress_bar "Installing $OS_TITLE to $1" "Expect to write $size KB..."
+
+#	( ( cd /; find $files | $CPIO -H newc -o ) | pv -ns ${size}k | ( $CPIO -iud > /dev/null; echo $? > /tmp/result )) 2>&1 \
+#		| progress_bar "Installing $OS_TITLE to $1" "Expect to write $size KB..."
+
+	## New way to copy files with rsync
+	(LD_LIBRARY_PATH=/system/system_ext/lib64 rsync -a --info=progress2 $files .; echo $? > /tmp/result) \
+	| stdbuf -oL awk 'BEGIN { RS="\r" } /%/ { print $2 }' \
+	| sed --unbuffered 's/%//g' \
+	| progress_bar "Installing $OS_TITLE to $1" "Expect to write $size KB..."
+
 	result=$((`cat /tmp/result`*255))
 
 	if [ $result -eq 0 ]; then
