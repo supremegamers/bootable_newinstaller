@@ -327,30 +327,45 @@ ALL DATA IN THIS PARTITION WILL BE LOST.\Zn\n\nAre you sure to format the partit
 
 create_winitem_bios()
 {
-#	win=`fdisk -l /dev/$(echo $1 | cut -b-3) | grep ^/dev | cut -b6-12,55- | awk '{
-#		if (match($2, "NTFS"))
-#			print $1
-#	}' | head -1`
-#	if [ -n "$win" ]; then
-#		dialog --backtitle "$BACK_TITLE" --title " Confirm " --yesno \
-#			"\nThe installer found a Windows partition in /dev/$win.\n\nDo you want to create a boot item for Windows?" 9 59
-#		[ $? -ne 0 ] && return 1
-#		wp=$((`echo $win | cut -b4-`-1))
-#		sed -i "s|#WINDOWS_ENTRY|add_winboot_entry $d $wp|" /hd/boot/grub/android.cfg
-#	fi
-	
+# If Windows is detected, check to see if bootmgr file is exist, or else searching for 
+# System Reserved partition
+#
+# Only check System Reserved for the disk that contain Windows, the Windows installer 
+# ain't gonna create SR in another disk. Also if you dual-boot 2 Windows and having
+# 2 System Reserved, either remove one or seek therapy.
+
 	mkdir /win
-	for i in `blkid | grep 'TYPE="ntfs"' | awk -F: '{print substr($1, 6)}'`; do
+	for i in `blkid | grep -v -E "^/dev/block/|^/dev/loop" | grep 'TYPE="ntfs"' | awk -F: '{print substr($1, 6)}'`; do
 		try_mount ro /dev/$i /win
 		if [ -d "/win/Program Files" ] && [ -d "/win/Windows/System32" ]; then
-			dialog --backtitle "$BACK_TITLE" --title " Confirm " --yesno \
-				"\nThe installer found a Windows partition in /dev/$win.\n\nDo you want to create a boot item for Windows?" 9 59
-			[ $? -ne 0 ] && continue
-			export windows_part=$i
+			if [ -f "/win/bootmgr" ]; then
+				dialog --backtitle "$BACK_TITLE" --title " Confirm " --yesno \
+					"\nThe installer found a Windows partition in /dev/$i.\n\nDo you want to create a boot item for Windows?" 9 59
+				[ $? -ne 0 ] && continue
+				export windows_part=$i
+			else
+				mkdir /sys_ser
+				winpart=$(basename `dirname /sys/block/*/$i`)
+				for srv in `blkid /dev/"$winpart"* | grep -v -E "^/dev/block/|^/dev/loop" | grep 'TYPE="ntfs"' | awk -F: '{print substr($1, 6)}'`; do
+					try_mount ro /dev/$srv /sys_ser
+					if [ "$(blkid /dev/$srv | grep 'TYPE="ntfs"' | grep 'LABEL="System Reserved"')" ]; then
+						if [ -f "/sys_ser/bootmgr" ]; then
+							dialog --backtitle "$BACK_TITLE" --title " Confirm " --yesno \
+								"\nThe installer found a System Reserved partition in /dev/$srv. This partition might contain boot files for Windows\n\nDo you want to create a boot item for it?" 10 62
+							[ $? -ne 0 ] && continue
+							export windows_part=$srv
+						fi
+					fi
+				done
+			fi
 		fi
-	get_part_info $windows_part
-	sed -i "s|#WINDOWS_ENTRY|add_winboot_entry $d $p|" /hd/boot/grub/android.cfg		
-	umount /win
+		get_part_info $windows_part
+		result_01=$d
+		result_02=$p
+		umount /win
+		if [ -d "/sys_ser" ]; then
+			umount /sys_ser
+		fi
 	done
 
 }
@@ -361,7 +376,7 @@ create_winitem_bios()
 create_winitem_uefi()
 {
 	mkdir /win
-	for i in `blkid | grep 'TYPE="ntfs"' | awk -F: '{print substr($1, 6)}'`; do
+	for i in `blkid | grep -v -E "^/dev/block/|^/dev/loop" | grep 'TYPE="ntfs"' | awk -F: '{print substr($1, 6)}'`; do
 		try_mount ro /dev/$i /win
 		if [ -d "/win/Program Files" ] && [ -d "/win/Windows/System32" ]; then
 			export windows_part=$i
@@ -840,6 +855,13 @@ install_process()
 	if [ $? -eq 0 ]; then
 		install_grub_bios $1
 		create_winitem_bios
+		#HACK: Somehow when putting this sed under create_winitem_bios() it will not allow
+		#$2 into add_winboot_entry, making the line now look like
+		#add_winboot_entry $1
+		#So we have to put it here
+		if [ $windows_part ] && [ -f /hd/boot/grub/android.cfg ]; then
+			sed -i "s|#WINDOWS_BIOS_ENTRY|add_winboot_entry $result_01 $result_02|" /hd/boot/grub/android.cfg
+		fi
 	fi
 
 	## UEFI installation
