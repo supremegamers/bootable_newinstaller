@@ -745,7 +745,13 @@ install_grub_efi()
 					$GRUB_MODULES
 
 	# Create boot entry for shim in nvram
-	efibootmgr -u -v -c -d /dev/$disk -p $esp -L "$EFI_LABEL" -l $efidir/$bootefi > /dev/tty4 2>&1	
+	# Check if the entry has been created, if not, it may due to the efivar got full
+	# Remove all /sys/firmware/efi/efivars/dump-* and run the command again
+	efibootmgr -u -v -c -d /dev/$disk -p $esp -L "$EFI_LABEL" -l $efidir/$bootefi > /dev/tty4 2>&1
+	if [ $? -eq 1 ] || [ ! $(efibootmgr | grep "$EFI_LABEL") ]; then 
+		rm -rf /sys/firmware/efi/efivars/dump-*
+		efibootmgr -u -v -c -d /dev/$disk -p $esp -L "$EFI_LABEL" -l $efidir/$bootefi > /dev/tty4 2>&1
+	fi
 }
 
 install_refind()
@@ -810,7 +816,13 @@ install_refind()
 		iconv -t UCS-2 > "efi$efidir/BOOT.CSV"
 
 	# Create boot entry for refind in nvram
+	# Check if the entry has been created, if not, it may due to the efivar got full
+	# Remove all /sys/firmware/efi/efivars/dump-* and run the command again
 	efibootmgr -u -v -c -d /dev/$disk -p $esp -L "rEFInd Boot Manager" -l $efidir/$refindefi > /dev/tty4 2>&1
+	if [ $? -eq 1 ] || [ ! $(efibootmgr | grep "rEFInd Boot Manager") ]; then 
+		rm -rf /sys/firmware/efi/efivars/dump-*
+		efibootmgr -u -v -c -d /dev/$disk -p $esp -L "rEFInd Boot Manager" -l $efidir/$refindefi > /dev/tty4 2>&1
+	fi
 }
 
 install_process()
