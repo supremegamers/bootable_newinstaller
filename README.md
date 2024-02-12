@@ -18,7 +18,7 @@ https://github.com/docker-library/busybox/tree/dist-i386/latest/glibc
 - lib/libresolv.so.2
 - lib/librt.so.1
 
-libc6 i386 (2.37-12)
+libc6 i386 (2.37-15~deb13u1)
 
 https://packages.debian.org/trixie/i386/libc6
 
@@ -40,13 +40,13 @@ https://packages.debian.org/trixie/i386/libntfs-3g89
 - bin/cfdisk
 - bin/sfdisk
 
-fdisk i386 (2.39.2)
+fdisk i386 (2.39.3-6)
 
 https://packages.debian.org/trixie/i386/fdisk
 
 - bin/dialog
 
-dialog i386 (1.3-20230209)
+dialog i386 (1.3-20240101-1)
 
 https://packages.debian.org/trixie/i386/dialog
 
@@ -60,7 +60,7 @@ https://packages.debian.org/trixie/i386/gdisk
 
 - bin/iconv
 
-libc-bin i386 (2.37-12)
+libc-bin i386 (2.37-15~deb13u1)
 
 https://packages.debian.org/trixie/i386/libc-bin
 
@@ -72,80 +72,80 @@ https://packages.debian.org/trixie/i386/squashfs-tools
 
 - bin/pv
 
-pv i386 (1.7.24-1)
+pv i386 (1.8.5-2)
 
 https://packages.debian.org/trixie/pv/i386
 
 - sbin/grub-install
 
-grub2-common i386 (2.06-13)
+grub2-common i386 (2.12-1)
 
 https://packages.debian.org/trixie/i386/grub2-common
 
 - sbin/grub-mkimage
 
-grub-common i386 (2.06-13)
+grub-common i386 (2.12-1)
 
 https://packages.debian.org/trixie/i386/grub-common
 
 - lib/terminfo/l/linux
 - lib/terminfo/l/linux3.0
 
-ncurses-term all (6.4+20230625-2)
+ncurses-term all (6.4+20240113-1)
 
 https://packages.debian.org/trixie/all/ncurses-term
 
 - lib/libncursesw.so.6
 
-libncursesw6 i386 (6.4+20230625-2)
+libncursesw6 i386 (6.4+20240113-1)
 
 https://packages.debian.org/trixie/i386/libncursesw6
 
 - lib/libtinfo.so.6
 
-libtinfo6 i386 (6.4+20230625-2)
+libtinfo6 i386 (6.4+20240113-1)
 
 https://packages.debian.org/trixie/i386/libtinfo6 
 
 - lib/libsmartcols.so.1
 
-libsmartcols1 i386 (2.39.2-1)
+libsmartcols1 i386 (2.39.3-6)
 
 https://packages.debian.org/trixie/i386/libsmartcols1
 
 - lib/libfdisk.so.1
 
-libfdisk1 i386 (2.39.2-1)
+libfdisk1 i386 (2.39.3-6)
 
 https://packages.debian.org/trixie/i386/libfdisk1
 
 - lib/libblkid.so.1
 
-libblkid1 i386 (2.39.2-1)
+libblkid1 i386 (2.39.3-6)
 
 https://packages.debian.org/trixie/i386/libblkid1
 
 - lib/libuuid.so.1
 
-libuuid1 i386 (2.39.2-1)
+libuuid1 i386 (2.39.3-6)
 
 https://packages.debian.org/trixie/i386/libuuid1
 
 - lib/libmount.so.1
 
-libmount1 i386 (2.39.2-1)
+libmount1 i386 (2.39.3-6)
 
 https://packages.debian.org/trixie/i386/libmount1
 
 - lib/libselinux.so.1
 
-libselinux1 i386 (3.5-1)
+libselinux1 i386 (3.5-2)
 
 https://packages.debian.org/trixie/i386/libselinux1
 
 - lib/libreadline.so.8
 
-libreadline8 i386 (8.2-1.3)
+libreadline8 i386 (8.2-3)
 
 https://packages.debian.org/trixie/i386/libreadline8
 
@@ -163,67 +163,67 @@ https://packages.debian.org/trixie/i386/libpopt0
 
 - lib/libstdc++.so.6
 
-libstdc++6 i386 (13.2.0-3)
+libstdc++6 i386 (14-20240201-3)
 
 https://packages.debian.org/trixie/i386/libstdc++6
 
 - lib/libgcc_s.so.1
 
-libgcc_s1 i386 (13.2.0-3)
+libgcc_s1 i386 (14-20240201-3)
 
 https://packages.debian.org/trixie/i386/libgcc-s1
 
 - lib/grub/i386-pc/*
 
-grub-pc-bin i386 (2.06-13)
+grub-pc-bin i386 (2.12-1)
 
 https://packages.debian.org/trixie/i386/grub-pc-bin
 
 - lib/grub/i386-efi/*
 
-grub-efi-ia32-bin i386 (2.06-13)
+grub-efi-ia32-bin i386 (2.12-1)
 
 https://packages.debian.org/trixie/i386/grub-efi-ia32-bin
 
 - lib/grub/x86_64-efi/*
 
-grub-efi-amd64-bin i386 (2.06-13)
+grub-efi-amd64-bin i386 (2.12-1)
 
 https://packages.debian.org/trixie/i386/grub-efi-amd64-bin
 
 - lib/liblzma.so.5
 
-liblzma5 i386 (5.4.4-0.1)
+liblzma5 i386 (5.4.5-0.3)
 
 https://packages.debian.org/trixie/i386/liblzma5
 
 - lib/libdevmapper.so.1.02.1
 
-libdevmapper1.02.1 i386 (2:1.02.185-2)
+libdevmapper1.02.1 i386 (2:1.02.185-3)
 
 https://packages.debian.org/trixie/i386/libdevmapper1.02.1
 
 - lib/libudev.so.1
 
-libudev1 i386 (254.1-3)
+libudev1 i386 (255.3-2)
 
 https://packages.debian.org/trixie/i386/libudev1
 
 - lib/libcap.so.2
 
-libcap2 i386 (1:2.66-4)
+libcap2 i386 (1:2.66-5)
 
 https://packages.debian.org/trixie/i386/libcap2
 
 - lib/libefiboot.so.1
 
-libefiboot1 i386 (37-6)
+libefiboot1 i386 (38-3)
 
 https://packages.debian.org/trixie/i386/libefiboot1
 
 - lib/libefivar.so.1
 
-libefivar1 i386 (37-6)
+libefivar1 i386 (38-3)
 
 https://packages.debian.org/trixie/i386/libefivar1
 
@@ -247,7 +247,7 @@ https://packages.debian.org/trixie/i386/libzstd1
 
 - lib/libz.so.1
 
-zlib1g i386 (1:1.2.13.dfsg-3)
+zlib1g i386 (1:1.3.dfsg-3+b1)
 
 https://packages.debian.org/trixie/i386/zlib1g
 
@@ -275,13 +275,13 @@ https://packages.debian.org/trixie/amd64/shim-helpers-amd64-signed
 
 - grub2/efi/boot/grubx64.efi
 
-grub-efi-amd64-bin i386 (2.06-13)
+grub-efi-amd64-bin i386 (2.12-1)
 
 https://packages.debian.org/trixie/i386/grub-efi-amd64-bin
 
 - grub2/efi/boot/grubia32.efi
 
-grub-efi-ia32-bin i386 (2.06-13)
+grub-efi-ia32-bin i386 (2.12-1)
 
 https://packages.debian.org/trixie/i386/grub-efi-ia32-bin
 
@@ -317,20 +317,20 @@ https://efi.akeo.ie/downloads/efifs-1.9/x64/
 
 - bin/sed 
 
-sed i386 (4.9-1)
+sed i386 (4.9-2)
 
 https://packages.debian.org/trixie/sed/i386
 
 - bin/stdbuf
 - usr/libexec/coreutils/libstdbuf.so
 
-coreutils i386 (9.1-1)
+coreutils i386 (9.4-3)
 
 https://packages.debian.org/trixie/coreutils/i386
 
 - lib/libacl.so.1
 
-libacl1 i386 (2.3.1-3)
+libacl1 i386 (2.3.2-1)
 
 https://packages.debian.org/trixie/libacl1/i386
 
