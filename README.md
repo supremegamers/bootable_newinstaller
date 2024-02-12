@@ -300,7 +300,6 @@ https://github.com/bobafetthotmail/refind-theme-regular
 - refind/refind/drivers_ia32/exfat_ia32.efi
 - refind/refind/drivers_ia32/f2fs_ia32.efi
 - refind/refind/drivers_ia32/fat_ia32.efi
-- refind/refind/drivers_ia32/ntfs_ia32.efi
 
 efifs ia32 (1.9)
 
@@ -309,11 +308,25 @@ https://efi.akeo.ie/downloads/efifs-1.9/ia32/
 - refind/refind/drivers_x64/exfat_x64.efi
 - refind/refind/drivers_x64/f2fs_x64.efi
 - refind/refind/drivers_x64/fat_x64.efi
-- refind/refind/drivers_x64/ntfs_x64.efi
 
 efifs x86_64 (1.9)
 
 https://efi.akeo.ie/downloads/efifs-1.9/x64/
+
+- refind/refind/drivers_ia32/ntfs_ia32.efi
+- refind/refind/drivers_x64/ntfs_x64.efi
+
+ntfs-3g-efifs all (1.7)
+
+https://github.com/pbatard/ntfs-3g
+
+- refind/refind/drivers_ia32/btrfs_ia32.efi
+- refind/refind/drivers_x64/btrfs_x64.efi
+
+btrfs-efi all (20230328)
+
+https://github.com/maharmstone/btrfs-efi
+
 
 - bin/sed 
 
