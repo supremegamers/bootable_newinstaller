@@ -40,6 +40,7 @@ GRUB_MODULES="
 	part_msdos
 	part_gpt
 	password_pbkdf2
+	peimage
 	png
 	probe
 	reboot
@@ -53,6 +54,7 @@ GRUB_MODULES="
     smbios
 	squash4
 	test
+	tpm
 	true
 	video
 	xfs
@@ -61,9 +63,7 @@ GRUB_MODULES="
 	zfsinfo
 	zstd
 	cpuid
-	linuxefi
 	play
-	tpm
 	cryptodisk
 	gcry_arcfour
 	gcry_blowfish
