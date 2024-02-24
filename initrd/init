@@ -196,7 +196,11 @@ try_mount()
 	fi
 	case $(blkid $1) in
 		*TYPE=*ntfs*)
-			mount.ntfs-3g -o rw,force $@
+			if [ "$USE_NTFS3" -ge 1 ] || [ "$BOOT_USE_NTFS3" -ge 1 ]; then
+				mount -t ntfs3 -o rw,noatime,windows_names $@
+			else
+				mount.ntfs-3g -o rw,force $@
+			fi
 			;;
 		*TYPE=*)
 			mount -o $RW,noatime $@
