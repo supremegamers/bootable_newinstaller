@@ -22,11 +22,38 @@ auto_detect()
 	cat /sys/devices/virtual/wmi/*/modalias | dev2mod
 }
 
+# Based on Alpine Linux's hwdrivers.initd
+auto_detect_alpine()
+{
+	tmp=/tmp/dev2mod
+	echo 'dev2mod() { while read dev; do case $dev in' > $tmp
+	sort -r /lib/modules/`uname -r`/modules.alias | \
+		sed -n 's/[()]/*/g; s/^alias  *\([^ ]*\)  *\(.*\)/\1)busybox modprobe -b \2;;/p' >> $tmp
+	echo 'esac; done; }' >> $tmp
+	for f in $(grep -Eh "drm_kms|sound.core|hyperv" /lib/modules/`uname -r`/modules.dep | cut -d. -f1); do
+		sed -i "/$(basename $f | sed 's/-/_/g')/d" $tmp
+	done
+	source $tmp
+	find /sys -name modalias -type f -print0 2> /dev/null | xargs -0 sort -u | dev2mod
+	# we run it twice so we detect all devices
+	find /sys -name modalias -type f -print0 2> /dev/null | xargs -0 sort -u | dev2mod
+
+	# check if framebuffer drivers got pulled in
+	#if [ -e /dev/fb0 ] && ! [ -e /sys/module/fbcon ]; then
+	#	modprobe -b -q fbcon
+	#fi
+}
+
 load_modules()
 {
-	if [ "$AUTO_LOAD" = "old" ]; then
-		auto_detect
-	fi
+	case "$AUTO_LOAD" in
+		alpine)
+			auto_detect_alpine
+		;;
+		old)
+			auto_detect
+		;;
+	esac
 
 	# 3G modules
 	for m in $EXTMOD; do

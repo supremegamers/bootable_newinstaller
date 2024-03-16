@@ -872,7 +872,7 @@ install_process()
 		#add_winboot_entry $1
 		#So we have to put it here
 		if [ $windows_part ] && [ -f /hd/boot/grub/android.cfg ]; then
-			sed -i "s|#WINDOWS_BIOS_ENTRY|add_winboot_entry $result_01 $result_02|" /hd/boot/grub/android.cfg
+			sed -i "s|#WINDOWS_BIOS_ENTRY|add_winboot_entry Windows $result_01 $result_02|" /hd/boot/grub/android.cfg
 		fi
 	fi
 

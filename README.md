@@ -6,6 +6,12 @@ Most of the libraries & programs are taken from Debian 13 (trixie), some are tak
 
 - bin/busybox
 
+busybox i386 (1.36.1-6)
+
+https://packages.debian.org/trixie/busybox/i386
+
+- bin/busybox.docker
+
 busybox i386 (1.36.1)
 
 https://github.com/docker-library/busybox/tree/dist-i386/latest/glibc

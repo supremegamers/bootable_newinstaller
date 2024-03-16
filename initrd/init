@@ -158,7 +158,11 @@ if test x"$HAS_CTTY" != x"Yes"; then
 	busybox mount -t sysfs sys /sys
 	busybox mount -t tmpfs tmpfs /tmp
 	# let busybox install all applets as symlinks
-	busybox --install -s /bin
+	# First let Docker busybox install applet
+	busybox.docker --install -s /bin
+	# Then we get Debian busybox applets in /tmp
+	# and move it back to /bin
+	mkdir /tmp/busybox_bin && busybox --install -s /tmp/busybox_bin && mv /tmp/busybox_bin/* /bin
 	# remove busybox fdisk & mke2fs
 	rm /bin/fdisk
 	rm /bin/mke2fs
@@ -204,7 +208,11 @@ try_mount()
 	fi
 	case $(blkid $1) in
 		*TYPE=*ntfs*)
-			mount.ntfs-3g -o rw,force $@
+			if [ "$USE_NTFS3" -ge 1 ] || [ "$BOOT_USE_NTFS3" -ge 1 ]; then
+				mount -t ntfs3 -o rw,noatime,windows_names $@
+			else
+				mount.ntfs-3g -o rw,force $@
+			fi
 			;;
 		*TYPE=*)
 			mount -o $RW,noatime $@
@@ -395,9 +403,13 @@ done
 # ensure keyboard driver is loaded
 if [ -n "$INSTALL" -o -n "$DEBUG" ]; then
 	echo "Detecting hardware..."
-	busybox modprobe -a atkbd hid-apple
-	auto_detect &
-	wait
+	busybox modprobe -a hid-apple
+	if [ "$AUTO_LOAD" = "alpine" ]; then
+		auto_detect_alpine &
+	else
+		auto_detect &
+	fi
+	sleep 2
 fi
 
 if [ 0$DEBUG -gt 0 ]; then
