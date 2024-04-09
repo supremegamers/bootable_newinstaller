@@ -16,7 +16,8 @@ BUILD_TOP := $(shell pwd)
 ifneq ($(filter x86%,$(TARGET_ARCH)),)
 LOCAL_PATH := $(call my-dir)
 
-RELEASE_OS_TITLE := BlissOS-$(VERSION)
+RELEASE_OS_NUM := Calyx-$(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR).$(PRODUCT_VERSION_PATCH)
+RELEASE_OS_TITLE := CalyxOS-$(CALYXOS_VERSION)
 
 include $(CLEAR_VARS)
 LOCAL_IS_HOST_MODULE := true
@@ -66,7 +67,7 @@ $(INITRD_RAMDISK): $(initrd_bin) $(systemimg) $(TARGET_INITRD_SCRIPTS) | $(ACP) 
 	$(if $(TARGET_INITRD_SCRIPTS),$(ACP) -p $(TARGET_INITRD_SCRIPTS) $(TARGET_INITRD_OUT)/scripts)
 	ln -s /bin/ld-linux.so.2 $(TARGET_INITRD_OUT)/lib
 	echo "VER=$(VER)" > $(TARGET_INITRD_OUT)/scripts/00-ver
-	$(if $(RELEASE_OS_TITLE),echo "OS_TITLE=$(RELEASE_OS_TITLE)" >> $(TARGET_INITRD_OUT)/scripts/00-ver)
+	$(if $(RELEASE_OS_NUM),echo "OS_TITLE=$(RELEASE_OS_NUM)" >> $(TARGET_INITRD_OUT)/scripts/00-ver)
 	$(if $(INSTALL_PREFIX),echo "INSTALL_PREFIX=$(INSTALL_PREFIX)" >> $(TARGET_INITRD_OUT)/scripts/00-ver)
 	$(MKBOOTFS) $(<D) $(TARGET_INITRD_OUT) | gzip -9 > $@
 
@@ -126,98 +127,21 @@ $(boot_dir): $(shell find $(LOCAL_PATH)/boot -type f | sort -r) $(systemimg) $(I
 BUILT_IMG := $(addprefix $(PRODUCT_OUT)/,initrd.img install.img ramdisk-recovery.img) $(systemimg)
 BUILT_IMG += $(if $(TARGET_PREBUILT_KERNEL),$(TARGET_PREBUILT_KERNEL),$(PRODUCT_OUT)/kernel)
 
-# Grab branch names
-KRNL := $(shell cd $(BUILD_TOP)/kernel ; make kernelversion)
-MSA := $(shell cd $(BUILD_TOP)/external/mesa ; git name-rev --name-only HEAD | cut -d '/' -f3)
-HWC := $(shell cd $(BUILD_TOP)/external/drm_hwcomposer ; git name-rev --name-only HEAD | cut -d '/' -f3)
-
-# Grab enabled extras
-ifeq ($(USE_GMS),true)
-	GMS := "_gms"
-else ifeq ($(USE_EMU_GAPPS),true)
-	GMS := "_emugapps"
-else ifeq ($(USE_FOSS_APPS),true)
-	GMS := "_foss"
-else
-	GMS := ""
-endif
-
-ifeq ($(USE_LIBNDK_TRANSLATION_NB),true)
-	HOU := "_libndk"
-else ifeq ($(USE_CROS_HOUDINI_NB),true)
-	HOU := "_cros-hd"
-else
-	HOU := ""
-endif
-
-ifeq ($(USE_WIDEVINE),true)
-WDV := "_cros-wv"
-else
-WDV := ""
-endif
-
-ifneq ("$(wildcard $(PRODUCT_OUT)/gearlock)","")
-GLK := "_gearlock"
-else
-GLK := ""
-endif
-
-ifeq ($(TARGET_ARCH),x86_64)
-IS_ANDROID_X86_64 := true
-else ifeq ($(TARGET_ARCH),x86)
-IS_ANDROID_X86_64 := false
-endif
-
-# Use vendor defined version names
-ifeq ($(TARGET_PRODUCT),virtualbox)
-KRNL := $(shell cd $(BUILD_TOP)/kernel ; make kernelversion)
-ROM_VENDOR_VERSION := $(RELEASE_OS_TITLE)-vbox-$(shell date +%Y%m%d%H%M)
-else ifeq ($(TARGET_PRODUCT),legacy_pc)
-KRNL := $(shell cd $(BUILD_TOP)/kernel ; make kernelversion)
-ROM_VENDOR_VERSION := $(RELEASE_OS_TITLE)-legacy_pc-$(shell date +%Y%m%d%H%M)
-else
-ROM_VENDOR_VERSION := $(RELEASE_OS_TITLE)-$(TARGET_ARCH)-$(shell date +%Y%m%d%H%M)
-endif
-
 BUILD_NAME_VARIANT := $(ROM_VENDOR_VERSION)
 
-ISO_IMAGE := $(PRODUCT_OUT)/$(BLISS_BUILD_ZIP).iso
+ISO_IMAGE := $(PRODUCT_OUT)/$(RELEASE_OS_TITLE).iso
 $(ISO_IMAGE): $(boot_dir) $(BUILT_IMG)
-	# Generate Changelog
-	bash bootable/newinstaller/tools/changelog
-	$(hide) mv Changelog.txt $(PRODUCT_OUT)/Changelog-$(BLISS_BUILD_ZIP).txt
 	@echo ----- Making iso image ------
 	$(hide) sed -i "s|\(Installation CD\)\(.*\)|\1 $(VER)|; s|CMDLINE|$(BOARD_KERNEL_CMDLINE)|" $</isolinux/isolinux.cfg
 	$(hide) sed -i "s|VER|$(VER)|; s|CMDLINE|$(BOARD_KERNEL_CMDLINE)|" $</efi/boot/android.cfg
-	sed -i "s|OS_TITLE|$(if $(RELEASE_OS_TITLE),$(RELEASE_OS_TITLE),Android-x86)|" $</isolinux/isolinux.cfg $</efi/boot/android.cfg
+	sed -i "s|OS_TITLE|$(if $(RELEASE_OS_NUM),$(RELEASE_OS_NUM),Android-x86)|" $</isolinux/isolinux.cfg $</efi/boot/android.cfg
 	PATH="/sbin:/usr/sbin:/bin:/usr/bin"; \
 	which xorriso > /dev/null 2>&1 && GENISOIMG="xorriso -as mkisofs" || GENISOIMG=genisoimage; \
 	$$GENISOIMG -vJURT -b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -e boot/grub/efi.img -no-emul-boot \
-		-input-charset utf-8 -V "$(if $(RELEASE_OS_TITLE),$(RELEASE_OS_TITLE),Android-x86) ($(TARGET_ARCH))" -o $@ $^
+		-input-charset utf-8 -V "$(if $(RELEASE_OS_NUM),$(RELEASE_OS_NUM),Android-x86) ($(TARGET_ARCH))" -o $@ $^
 	$(hide) PATH="/sbin:/usr/sbin:/bin:/usr/bin" isohybrid --uefi $@
 	$(hide) $(SHA256) $(ISO_IMAGE) | sed "s|$(PRODUCT_OUT)/||" > $(ISO_IMAGE).sha256
-	@echo -e ${CL_CYN}""${CL_CYN}
-	@echo -e ${CL_CYN}"      ___           ___                   ___           ___      "${CL_CYN}
-	@echo -e ${CL_CYN}"     /\  \         /\__\      ___        /\  \         /\  \     "${CL_CYN}
-	@echo -e ${CL_CYN}"    /::\  \       /:/  /     /\  \      /::\  \       /::\  \    "${CL_CYN}
-	@echo -e ${CL_CYN}"   /:/\:\  \     /:/  /      \:\  \    /:/\ \  \     /:/\ \  \   "${CL_CYN}
-	@echo -e ${CL_CYN}"  /::\~\:\__\   /:/  /       /::\__\  _\:\~\ \  \   _\:\~\ \  \  "${CL_CYN}
-	@echo -e ${CL_CYN}" /:/\:\ \:\__\ /:/__/     __/:/\/__/ /\ \:\ \ \__\ /\ \:\ \ \__\ "${CL_CYN}
-	@echo -e ${CL_CYN}" \:\~\:\/:/  / \:\  \    /\/:/  /    \:\ \:\ \/__/ \:\ \:\ \/__/ "${CL_CYN}
-	@echo -e ${CL_CYN}"  \:\ \::/  /   \:\  \   \::/__/      \:\ \:\__\    \:\ \:\__\   "${CL_CYN}
-	@echo -e ${CL_CYN}"   \:\/:/  /     \:\  \   \:\__\       \:\/:/  /     \:\/:/  /   "${CL_CYN}
-	@echo -e ${CL_CYN}"    \::/__/       \:\__\   \/__/        \::/  /       \::/  /    "${CL_CYN}
-	@echo -e ${CL_CYN}"     ~~            \/__/                 \/__/         \/__/     "${CL_CYN}
-	@echo -e ${CL_CYN}""${CL_CYN}
-	@echo -e ${CL_CYN}"===========-Bliss Package Complete-==========="${CL_RST}
-	@echo -e ${CL_CYN}"Zip: "${CL_MAG} $(ISO_IMAGE)${CL_RST}
-	@echo -e ${CL_CYN}"SHA256: "${CL_MAG}" `cat $(ISO_IMAGE).sha256 | cut -d ' ' -f 1`"${CL_RST}
-	@echo -e ${CL_CYN}"Size:"${CL_MAG}" `ls -lah $(ISO_IMAGE) | cut -d ' ' -f 5`"${CL_RST}
-	@echo -e ${CL_CYN}"==============================================="${CL_RST}
-	@echo -e ${CL_CYN}"Have A Truly Blissful Experience"${CL_RST}
-	@echo -e ${CL_CYN}"==============================================="${CL_RST}
-	@echo -e ""
 
 rpm: $(wildcard $(LOCAL_PATH)/rpm/*) $(BUILT_IMG)
 	@echo ----- Making an rpm ------

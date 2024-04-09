@@ -14,8 +14,8 @@ menufile=/tmp/menu-$$
 CPIO=cpio
 OS_TITLE=${OS_TITLE:-Android-x86}
 BACK_TITLE="Made by Android-x86 Project, Modified by BlissLabs & Contributors"
-EFI_LABEL="BlissOS"
-INSTALL_LABEL="BlissOS"
+EFI_LABEL="CalyxOS"
+INSTALL_LABEL="CalyxOS"
 
 rebooting()
 {
